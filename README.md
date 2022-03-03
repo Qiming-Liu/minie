@@ -2,17 +2,26 @@
 
 # MinIE: Open Information Extraction system
 
-* [Open Information Extraction - brief introduction](#open-information-extraction---brief-introduction)
-* [MinIE - Open Information Extraction system](#minie---open-information-extraction-system)
-* [Version](#version)
-* [Demo](#demo)
-* [MinIE service](#minie-service)
-* [Python wrapper](#python-wrapper)
-* [Resources](#resources)
-* [MinIE in other downstream applications](#minie-in-other-downstream-applications)
-* [Citing](#citing)
+- [MinIE: Open Information Extraction system](#minie-open-information-extraction-system)
+  - [Docker](#docker)
+  - [Open Information Extraction - brief introduction](#open-information-extraction---brief-introduction)
+  - [MinIE - Open Information Extraction system](#minie---open-information-extraction-system)
+  - [Version](#version)
+  - [Demo](#demo)
+  - [MinIE Service](#minie-service)
+  - [Python wrapper](#python-wrapper)
+  - [Resources](#resources)
+  - [MinIE in other downstream applications](#minie-in-other-downstream-applications)
+  - [Citing](#citing)
 
 ---
+## Docker
+The code fixed for `mvn exec:java` and `IndexOutOfBoundsException`.
+And build a docker image for it.
+```shell
+$ docker run -p 8080:8080 alanpross/minie -d
+```
+
 
 ## Open Information Extraction - brief introduction
 

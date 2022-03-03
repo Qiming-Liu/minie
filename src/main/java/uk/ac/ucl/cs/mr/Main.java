@@ -5,10 +5,9 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-
-import org.glassfish.grizzly.http.server.HttpServer;
 
 /**
  * @author Pasquale Minervini
@@ -19,6 +18,11 @@ public class Main {
     private static final URI BASE_URI = URI.create("http://localhost:8080/minie/");
 
     public static void main(String[] args) {
+
+        // process my json
+//        new Thread(() -> ProcessJsonMinIE.process("a0")).start();
+        // end process
+
         try {
             System.out.println("MinIE Service");
 
