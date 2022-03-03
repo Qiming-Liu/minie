@@ -17,6 +17,18 @@
   </properties>
 
   <dependencies>
+    <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>fastjson</artifactId>
+        <version>1.2.79</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.jumpmind.symmetric</groupId>
+        <artifactId>symmetric</artifactId>
+        <version>1.7.3</version>
+    </dependency>
+    
     <!-- https://mvnrepository.com/artifact/it.unimi.dsi/fastutil -->
     <dependency>
         <groupId>it.unimi.dsi</groupId>
