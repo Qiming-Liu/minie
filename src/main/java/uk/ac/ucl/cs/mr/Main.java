@@ -15,35 +15,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class Main {
 
-    private static final URI BASE_URI = URI.create("http://localhost:8080/minie/");
-
     public static void main(String[] args) {
 
-        // process my json
-//        new Thread(() -> ProcessJsonMinIE.process("a0")).start();
-        // end process
-
-        try {
-            System.out.println("MinIE Service");
-
-            final HttpServer server = GrizzlyHttpServerFactory
-                    .createHttpServer(BASE_URI, create(), false);
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    server.shutdownNow();
-                }
-            }));
-            server.start();
-
-            System.out.println(String.format("Application started.%n" +
-                    "Stop the application using CTRL+C"));
-
-            Thread.currentThread().join();
-        } catch (IOException | InterruptedException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        ProcessJsonMinIE.process(args[0]);
     }
 
     public static ResourceConfig create() {

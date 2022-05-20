@@ -11,13 +11,12 @@ import de.uni_mannheim.utils.coreNLP.CoreNLPUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ProcessJsonMinIE {
     //run this function to start process minie
-    public static void process(String filename) {
-        String json = readJsonFile("C:\\Users\\pross\\Desktop\\project\\github\\ie_script\\data_json\\" + filename + ".json");
+    public static void process(String path) {
+        String json = readJsonFile(path);
         JSONArray jsonArray = JSON.parseArray(json);
         List<Fact> facts = new ArrayList<>();
 
@@ -26,18 +25,24 @@ public class ProcessJsonMinIE {
             if (((String) jsonArray.get(i)).length() > 1) { //sometimes null string
                 FactsBean factsBean = query((String) jsonArray.get(i));
                 facts.addAll(factsBean.facts);
-                long costTime = System.currentTimeMillis() - startTime;
-                long avgTime = costTime / (i + 1);
-                long leftTime = avgTime * (jsonArray.size() - i);
 
-                //print like tqdm
-                String print = (i + 1) + "/" + jsonArray.size() + " costTime(s):" + String.format("%-8s", costTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000) + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0);
-                System.out.println("[" + filename + "]" + print);
+                int fi = i;
+                factsBean.facts.forEach(fact -> fact.sentence = (String) jsonArray.get(fi));
+
+                if (i % 10 == 0) {
+                    long costTime = System.currentTimeMillis() - startTime;
+                    long avgTime = costTime / (i + 1);
+                    long leftTime = avgTime * (jsonArray.size() - i);
+
+                    //print like tqdm
+                    String print = (i + 1) + "/" + jsonArray.size() + " costTime(s):" + String.format("%-8s", costTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000) + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0);
+                    System.out.println(print);
+                }
             }
         }
 
         // need to create csv file first
-        writeCsvFile("C:\\Users\\pross\\Desktop\\project\\github\\ie_script\\result_minie\\" + filename + "r.csv", facts);
+        writeCsvFile(path + ".csv", facts);
     }
 
     public static String readJsonFile(String fileName) {
@@ -91,11 +96,17 @@ public class ProcessJsonMinIE {
         CsvWriter csvWriter = new CsvWriter(writeCsvFilePath, ',', StandardCharsets.UTF_8);
 
         try {
-            String[] headers = {"subject", "relation", "object"};
+            String[] headers = {"subject", "relation", "object", "sentence"};
             csvWriter.writeRecord(headers);
 
             for (int i = 0; i < facts.size(); i++) {
-                csvWriter.writeRecord((String[]) Arrays.asList(facts.get(i).subject, facts.get(i).predicate, facts.get(i).object).toArray());
+                String subject = facts.get(i).subject;
+                String predicate = facts.get(i).predicate;
+                String object = facts.get(i).object;
+                String sentence = facts.get(i).sentence;
+                String[] output = new String[]{subject, predicate, object, sentence};
+
+                csvWriter.writeRecord(output);
             }
         } catch (Exception e) {
             e.printStackTrace();

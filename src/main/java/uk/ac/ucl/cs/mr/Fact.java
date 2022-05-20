@@ -9,6 +9,7 @@ public class Fact {
     public String subject = null;
     public String predicate = null;
     public String object = null;
+    public String sentence = null;
 
     public Fact(String s, String p, String o) {
         this.subject = s;
