@@ -67,13 +67,13 @@ public class ProcessJsonMinIE {
                 facts.addAll(factsBean.facts);
                 left--;
 
-                if (left % 100 == 0 && total != left) {
+                if (left % 1000 == 0 && total != left) {
                     long costTime = System.currentTimeMillis() - startTime;
                     long avgTime = costTime / (total - left);
                     long leftTime = avgTime * left;
 
                     //print like tqdm
-                    String print = (i + 1) + "/" + total + " costTime(s):" + String.format("%-8s", costTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000) + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0);
+                    String print = (i + 1) + "/" + total + " costTime(s):" + String.format("%-8s", costTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000);
                     System.out.println("Thread " + index + ": " + print);
                 }
             }
