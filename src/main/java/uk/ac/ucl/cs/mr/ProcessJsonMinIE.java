@@ -12,37 +12,74 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 
 public class ProcessJsonMinIE {
-    //run this function to start process minie
-    public static void process(String path) {
+
+
+    public static int total = 0;
+    public static int left = 0;
+
+    public static void process(String path, int nThreads) {
         String json = readJsonFile(path);
         JSONArray jsonArray = JSON.parseArray(json);
+        List<Fact> facts = new ArrayList<>();
+
+        total = jsonArray.size();
+        left = total;
+        ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
+        CountDownLatch latch = new CountDownLatch(nThreads);
+
+        for (int i = 0; i < nThreads; i++) {
+            final List<Object> task = jsonArray.subList(total / nThreads * i, total / nThreads * (i + 1));
+            int fi = i;
+
+            executorService.execute(() -> {
+                try {
+                    facts.addAll(oneTask(task, fi));
+                } finally {
+                    latch.countDown();
+                    System.out.println(latch.getCount());
+                }
+            });
+        }
+
+        try {
+            latch.await();
+        } catch (InterruptedException ignored) {
+
+        }
+
+        // need to create csv file first
+        writeCsvFile(path + ".csv", facts);
+        executorService.shutdown();
+    }
+
+    public static List<Fact> oneTask(List<Object> jsonArray, int index) {
         List<Fact> facts = new ArrayList<>();
 
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < jsonArray.size(); i++) {
             if (((String) jsonArray.get(i)).length() > 1) { //sometimes null string
                 FactsBean factsBean = query((String) jsonArray.get(i));
-                facts.addAll(factsBean.facts);
-
                 int fi = i;
                 factsBean.facts.forEach(fact -> fact.sentence = (String) jsonArray.get(fi));
+                facts.addAll(factsBean.facts);
+                left--;
 
-                if (i % 10 == 0) {
+                if (left % 100 == 0 && total != left) {
                     long costTime = System.currentTimeMillis() - startTime;
-                    long avgTime = costTime / (i + 1);
-                    long leftTime = avgTime * (jsonArray.size() - i);
+                    long avgTime = costTime / (total - left);
+                    long leftTime = avgTime * left;
 
                     //print like tqdm
-                    String print = (i + 1) + "/" + jsonArray.size() + " costTime(s):" + String.format("%-8s", costTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000) + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0);
-                    System.out.println(print);
+                    String print = (i + 1) + "/" + total + " costTime(s):" + String.format("%-8s", costTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000) + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0);
+                    System.out.println("Thread " + index + ": " + print);
                 }
             }
         }
 
-        // need to create csv file first
-        writeCsvFile(path + ".csv", facts);
+        return facts;
     }
 
     public static String readJsonFile(String fileName) {

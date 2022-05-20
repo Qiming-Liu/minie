@@ -17,7 +17,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        ProcessJsonMinIE.process(args[0]);
+        ProcessJsonMinIE.process(args[0], Integer.parseInt(args[1]));
     }
 
     public static ResourceConfig create() {
