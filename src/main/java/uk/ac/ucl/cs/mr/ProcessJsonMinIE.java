@@ -10,15 +10,20 @@ import de.uni_mannheim.utils.coreNLP.CoreNLPUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.IntStream;
 
 public class ProcessJsonMinIE {
 
 
     public static int total = 0;
-    public static int left = 0;
+    public static int[] done;
+    public static long startTime = 0;
+
+    public static NumberFormat nf = NumberFormat.getNumberInstance();
 
     public static void process(String path, int nThreads) {
         String json = readJsonFile(path);
@@ -26,9 +31,12 @@ public class ProcessJsonMinIE {
         List<Fact> facts = new ArrayList<>();
 
         total = jsonArray.size();
-        left = total;
+        done = new int[nThreads];
+
         ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
         CountDownLatch latch = new CountDownLatch(nThreads);
+
+        startTime = System.currentTimeMillis();
 
         for (int i = 0; i < nThreads; i++) {
             final List<Object> task = jsonArray.subList(total / nThreads * i, total / nThreads * (i + 1));
@@ -58,24 +66,26 @@ public class ProcessJsonMinIE {
     public static List<Fact> oneTask(List<Object> jsonArray, int index) {
         List<Fact> facts = new ArrayList<>();
 
-        long startTime = System.currentTimeMillis();
+
         for (int i = 0; i < jsonArray.size(); i++) {
             if (((String) jsonArray.get(i)).length() > 1) { //sometimes null string
                 FactsBean factsBean = query((String) jsonArray.get(i));
                 int fi = i;
                 factsBean.facts.forEach(fact -> fact.sentence = (String) jsonArray.get(fi));
                 facts.addAll(factsBean.facts);
-                left--;
+            }
 
-                if (left % 1000 == 0 && total != left) {
-                    long costTime = System.currentTimeMillis() - startTime;
-                    long avgTime = costTime / (total - left);
-                    long leftTime = avgTime * left;
+            if (i % 200 == 0 & i != 0) {
+                done[index] = i;
 
-                    //print like tqdm
-                    String print = (i + 1) + "/" + total + " costTime(s):" + String.format("%-8s", costTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000);
-                    System.out.println("Thread " + index + ": " + print);
-                }
+                long doneSum = IntStream.of(done).sum();
+                long avgTime = (System.currentTimeMillis() - startTime) / doneSum;
+                long leftTime = avgTime * (total - doneSum);
+                double p = doneSum / total * 100.0;
+
+                //print like tqdm
+                String print = nf.format(p) + "% avgTime(s):" + String.format("%-8s", avgTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000);
+                System.out.println("Thread " + index + ": " + print);
             }
         }
 
