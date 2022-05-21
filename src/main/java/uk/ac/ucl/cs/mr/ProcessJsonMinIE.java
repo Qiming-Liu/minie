@@ -23,8 +23,6 @@ public class ProcessJsonMinIE {
     public static int[] done;
     public static long startTime = 0;
 
-    public static NumberFormat nf = NumberFormat.getNumberInstance();
-
     public static void process(String path, int nThreads) {
         String json = readJsonFile(path);
         JSONArray jsonArray = JSON.parseArray(json);
@@ -78,13 +76,13 @@ public class ProcessJsonMinIE {
             if (i % 200 == 0 & i != 0) {
                 done[index] = i;
 
+                long currTime = System.currentTimeMillis() - startTime;
                 long doneSum = IntStream.of(done).sum();
-                long avgTime = (System.currentTimeMillis() - startTime) / doneSum;
+                long avgTime = currTime / doneSum;
                 long leftTime = avgTime * (total - doneSum);
-                double p = doneSum / total * 100.0;
 
                 //print like tqdm
-                String print = nf.format(p) + "% avgTime(s):" + String.format("%-8s", avgTime / 1000) + " leftTime(s):" + String.format("%-8s", leftTime / 1000);
+                String print = doneSum + "/" + total + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0) + " currTime(s):" + String.format("%-8s", currTime / 1000.0) + " leftTime(s):" + String.format("%-8s", leftTime / 1000.0);
                 System.out.println("Thread " + index + ": " + print);
             }
         }
