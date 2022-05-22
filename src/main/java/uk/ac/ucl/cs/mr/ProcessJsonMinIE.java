@@ -73,15 +73,15 @@ public class ProcessJsonMinIE {
                 facts.addAll(factsBean.facts);
             }
 
-            if (i % 200 == 0 & i != 0) {
-                done[index] = i;
+            done[index] = i;
 
-                long currTime = System.currentTimeMillis() - startTime;
-                long doneSum = IntStream.of(done).sum();
-                long avgTime = currTime / doneSum;
-                long leftTime = avgTime * (total - doneSum);
+            long currTime = System.currentTimeMillis() - startTime;
+            long doneSum = IntStream.of(done).sum();
+            long leftSum = total - doneSum;
+            long avgTime = currTime / doneSum;
+            long leftTime = avgTime * leftSum;
 
-                //print like tqdm
+            if ((i % 200 == 0 & i != 0) || (leftSum < 10000)) {
                 String print = doneSum + "/" + total + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0) + " currTime(s):" + String.format("%-8s", currTime / 1000.0) + " leftTime(s):" + String.format("%-8s", leftTime / 1000.0);
                 System.out.println("Thread " + index + ": " + print);
             }
