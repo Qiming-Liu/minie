@@ -23,6 +23,8 @@ public class ProcessJsonMinIE {
     public static int[] done;
     public static long startTime = 0;
 
+    public static CountDownLatch latch;
+
     public static void process(String path, int nThreads) {
         String json = readJsonFile(path);
         JSONArray jsonArray = JSON.parseArray(json);
@@ -32,7 +34,7 @@ public class ProcessJsonMinIE {
         done = new int[nThreads];
 
         ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
-        CountDownLatch latch = new CountDownLatch(nThreads);
+        latch = new CountDownLatch(nThreads);
 
         startTime = System.currentTimeMillis();
 
@@ -45,7 +47,11 @@ public class ProcessJsonMinIE {
                     facts.addAll(oneTask(task, fi));
                 } finally {
                     latch.countDown();
-                    System.out.println(latch.getCount());
+                    System.out.println(fi + ":" + latch.getCount());
+
+                    if (latch.getCount() == 1) {
+                        writeCsvFile(path + ".csv", facts);
+                    }
                 }
             });
         }
@@ -82,7 +88,7 @@ public class ProcessJsonMinIE {
                 long avgTime = currTime / doneSum;
                 long leftTime = avgTime * leftSum;
 
-                if ((i % 200 == 0 & i != 0) || (leftSum < 10000)) {
+                if (i % 200 == 0 || latch.getCount() == 1) {
                     String print = doneSum + "/" + total + " avgTime(s):" + String.format("%-8s", avgTime / 1000.0) + " currTime(s):" + String.format("%-8s", currTime / 1000.0) + " leftTime(s):" + String.format("%-8s", leftTime / 1000.0);
                     System.out.println("Thread " + index + ": " + print);
                 }
