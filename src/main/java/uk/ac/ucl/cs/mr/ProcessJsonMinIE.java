@@ -47,10 +47,13 @@ public class ProcessJsonMinIE {
                     facts.addAll(oneTask(task, fi));
                 } finally {
                     latch.countDown();
-                    System.out.println(fi + ":" + latch.getCount());
 
-                    if (latch.getCount() == 1) {
-                        writeCsvFile(path + ".csv", facts);
+                    for (int i1 = 0; i1 < done.length; i1++) {
+                        System.out.println(done[fi] + "-:-latch " + latch.getCount() + "-:-index " + fi);
+                    }
+
+                    if (latch.getCount() < 3) {
+                        writeCsvFile(path + ".csv" + latch.getCount(), facts);
                     }
                 }
             });
